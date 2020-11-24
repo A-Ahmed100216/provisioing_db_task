@@ -38,13 +38,13 @@ sudo apt-get install nginx -y
 3. To install [MongoDB](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/), add the following commands to the provisioning file.
 ```bash
 # Import the public key
-wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+wget -qO - https://www.mongodb.org/static/pgp/server-3.2.asc | sudo apt-key add -
 # Create a list file for MongoDB
-echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
 # Reload package database
 sudo apt-get update
-# Install MongoDB
-sudo apt-get install -y mongodb-org
+# Install MongoDB - version 3.2.20 to pass tests
+sudo apt-get install -y mongodb-org=3.2.20 mongodb-org-server=3.2.20 mongodb-org-shell=3.2.20 mongodb-org-mongos=3.2.20 mongodb-org-tools=3.2.20
 ```
 4. Inside the virtual machine, run the following commands to ensure the database is running correctly:
 ```bash
@@ -56,11 +56,25 @@ sudo systemctl status mongod
 
 # Enable MongoDB
 sudo systemctl enable mongod
+
+# Stop MongoDB
+sudo systemctl stop mongod
 ```
 
-5. Run tests
+5. Open the mongod.conf file to allow it to listen on port 0.0.0.0
+```
+sudo nano /etc/mongod.conf
+```
+6. Edit the bind ip to 0.0.0.0
+7. Restart mongod and start mongo
+```
+sudo service mongod restart
+sudo systemctl enable mongod
+mongo
+```
+
+8. Run tests
 ```
 cd tests
 rake spec
 ```
-All the tests except the version test should pass.
